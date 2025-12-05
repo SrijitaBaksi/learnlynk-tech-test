@@ -4,6 +4,21 @@
 
 This document outlines the implementation details, architectural decisions, and setup instructions for the LearnLynk technical assessment. The project demonstrates a task management system built with Supabase Postgres, Edge Functions, and Next.js.
 
+## Stripe Answer
+
+To implement a Stripe Checkout flow for an application fee:
+
+1. **Create Payment Request**: When a user initiates payment (e.g., clicking "Pay Application Fee"), insert a row into `payment_requests` table with fields: `id`, `application_id`, `amount`, `currency`, `status='pending'`, `created_at`. This creates an audit trail before calling Stripe.
+
+2. **Call Stripe Checkout**: Use the Stripe API to create a Checkout Session with `mode='payment'`, passing the amount, success/cancel URLs, and metadata (`application_id`, `payment_request_id`). Store the returned `session_id` in the `payment_requests` row along with `stripe_checkout_session_id` field.
+
+3. **Redirect User**: Send the user to the Stripe Checkout URL (`session.url`). They complete payment on Stripe's hosted page.
+
+4. **Handle Webhooks**: Set up an endpoint to receive Stripe webhooks, specifically `checkout.session.completed`. Verify the webhook signature using the signing secret. Extract `payment_intent_id` and metadata from the event payload, then update `payment_requests` with `status='completed'`, `stripe_payment_intent_id`, and `paid_at` timestamp.
+
+5. **Update Application**: In the webhook handler, after confirming payment success, update the `applications` table setting `payment_status='paid'` and `paid_at` timestamp for the corresponding `application_id`. This unlocks the application for processing. Use database transactions to ensure both `payment_requests` and `applications` are updated atomically, preventing inconsistencies if errors occur.
+
+
 ## Project Structure
 
 ```
@@ -349,3 +364,6 @@ To test the application:
 ## Conclusion
 
 This implementation demonstrates a functional task management system with proper database design, security policies, serverless functions, and a modern frontend. While some features are simplified for the assessment timeframe, the architecture is scalable and follows best practices for production applications. The RLS bypass is clearly documented as a temporary testing measure, and the path to production readiness is well defined.
+
+---
+

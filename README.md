@@ -4,6 +4,20 @@
 
 This document outlines the implementation details, architectural decisions, and setup instructions for the LearnLynk technical assessment. The project demonstrates a task management system built with Supabase Postgres, Edge Functions, and Next.js.
 
+## Screenshots
+
+### Home Page
+![Home Page](./screenshots/home-page.png)
+*Landing page with navigation to Today's Tasks and Create Task*
+
+### Today's Tasks Dashboard
+![Today's Tasks](./screenshots/today-tasks.png)
+*Dashboard displaying all tasks due today with completion functionality*
+
+### Create Task Form
+![Create Task](./screenshots/create-task.png)
+*Form to create new tasks with application ID, task type, and due date*
+
 ## Stripe Answer
 
 To implement a Stripe Checkout flow for an application fee:
